@@ -63,12 +63,21 @@ function changeChatMemberStatus(chat_id, user_id, status, cb, cmd)
   	}, cb or dl_cb, cmd)
 end
 
+--function delete_msg(chat_id, msg_id)--
+	--msg_id = {[0] = msg_id}--
+  --  tdbot_function ({--
+    	--_ = "deleteMessages",--
+    	--chat_id = chat_id,--
+    	--message_ids = msg_id--
+   -- }, dl_cb, nil)--
+--end--
+
 function delete_msg(chat_id, msg_id)
 	msg_id = {[0] = msg_id}
-    tdbot_function ({
-    	_ = "deleteMessages",
-    	chat_id = chat_id,
-    	message_ids = msg_id
+    tdcli_function ({
+    	ID = "DeleteMessages",
+    	chat_id_ = chat_id,
+    	message_ids_ = msg_id
     }, dl_cb, nil)
 end
 
