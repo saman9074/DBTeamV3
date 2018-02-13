@@ -1,4 +1,8 @@
 serpent = require("serpent")
+URL = require "socket.url"
+http = require "socket.http"
+https = require "ssl.https"
+ltn12 = require "ltn12"
 
 --json = (loadfile "./libs/JSON.lua")()
 
