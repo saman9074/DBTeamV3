@@ -8,7 +8,27 @@
 --extra.lua
 --by @iicc1
 -- missing translations
-
+local function get_staticmap(area)
+	local api        = base_api .. "/staticmap?"
+	local lat,lng,acc,types = get_latlong(area)
+	local scale = types[1]
+	if scale == "locality" then
+		zoom=8
+	elseif scale == "country" then 
+		zoom=4
+	else 
+		zoom = 13 
+	end
+	local parameters =
+		"size=600x300" ..
+		"&zoom="  .. zoom ..
+		"&center=" .. URL.escape(area) ..
+		"&markers=color:red"..URL.escape("|"..area)
+	if api_key ~= nil and api_key ~= "" then
+		parameters = parameters .. "&key="..api_key
+	end
+	return lat, lng, api..parameters
+end
 local function run(msg, matches)
 	if matches[1] ==  "extra" and not msg.reply_id then	
 		if matches[2] then
@@ -24,6 +44,27 @@ local function run(msg, matches)
 			end
 			send_msg(msg.to.id, list, 'html')
 		end
+	elseif matches[1] ==  "azan" and msg.reply_id then
+		if matches[2] then
+			city = matches[2]
+		elseif not matches[2] then
+			city = 'Tehran'
+		end	
+		local lat,lng,url	= get_staticmap(city)
+		local dumptime = run_bash('date +%s')
+		local code = http.request('http://api.aladhan.com/timings/'..dumptime..'?latitude='..lat..'&longitude='..lng..'&timezonestring=Asia/Tehran&method=7')
+		local jdat = json:decode(code)
+		local data = jdat.data.timings
+		local text = 'شهر: '..city
+		text = text..'\nاذان صبح: '..data.Fajr
+		text = text..'\nطلوع آفتاب: '..data.Sunrise
+		text = text..'\nاذان ظهر: '..data.Dhuhr
+		text = text..'\nغروب آفتاب: '..data.Sunset
+		text = text..'\nاذان مغرب: '..data.Maghrib
+		text = text..'\nعشاء : '..data.Isha
+		text = text..msg_caption
+		send_msg(msg.to.id, text, 'html')
+		
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
 			get_msg_info(msg.to.id, msg.reply_id, infofile, matches[2])			
