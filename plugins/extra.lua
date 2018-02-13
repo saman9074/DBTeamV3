@@ -8,6 +8,37 @@
 --extra.lua
 --by @iicc1
 -- missing translations
+
+local function run_bash(str)
+    local cmd = io.popen(str)
+    local result = cmd:read('*all')
+    return result
+end
+
+local api_key = nil
+local base_api = "https://maps.googleapis.com/maps/api"
+
+local function get_latlong(area)
+	local api      = base_api .. "/geocode/json?"
+	local parameters = "address=".. (URL.escape(area) or "")
+	if api_key ~= nil then
+		parameters = parameters .. "&key="..api_key
+	end
+	local res, code = https.request(api..parameters)
+	if code ~=200 then return nil  end
+	local data = json:decode(res)
+	if (data.status == "ZERO_RESULTS") then
+		return nil
+	end
+	if (data.status == "OK") then
+		lat  = data.results[1].geometry.location.lat
+		lng  = data.results[1].geometry.location.lng
+		acc  = data.results[1].geometry.location_type
+		types= data.results[1].types
+		return lat,lng,acc,types
+	end
+end
+
 local function get_staticmap(area)
 	local api        = base_api .. "/staticmap?"
 	local lat,lng,acc,types = get_latlong(area)
@@ -44,7 +75,7 @@ local function run(msg, matches)
 			end
 			send_msg(msg.to.id, list, 'html')
 		end
-	elseif matches[1] ==  "azan" and msg.reply_id then
+	elseif matches[1] ==  "azan" then
 		if matches[2] then
 			city = matches[2]
 		elseif not matches[2] then
@@ -64,6 +95,7 @@ local function run(msg, matches)
 		text = text..'\nعشاء : '..data.Isha
 		text = text..msg_caption
 		send_msg(msg.to.id, text, 'html')
+		send_msg(msg.to.id, "<b> ok <b>", 'html')
 		
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
@@ -203,6 +235,7 @@ end
 return {
         patterns = {
 				"^[!/#](%S+) (.*)$",
+				'^[!/#](azan) (.*)$',
 				"^[!/#](.*)$"				
 				},
     run = run
