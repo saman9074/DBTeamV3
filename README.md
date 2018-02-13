@@ -45,7 +45,7 @@ If you are not able to install the bot in Ubuntu 14, an upgrade to Ubuntu 16.04 
 
 After installing the dependencies, lets install the bot:
 ```bash
- git clone https://github.com/Josepdal/DBTeamV3.git
+ git clone https://github.com/saman9074/DBTeamV3.git
  cd DBTeamV3
  chmod +x launch.sh
  ./launch.sh install
