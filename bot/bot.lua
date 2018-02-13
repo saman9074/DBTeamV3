@@ -16,6 +16,20 @@ require('utils')
 require("permissions")
 require('methods')
 
+tdcli = dofile('./tg/tdcli.lua')
+serpent = (loadfile "./libs/serpent.lua")()
+feedparser = (loadfile "./libs/feedparser.lua")()
+require('./bot/utils')
+require('./libs/lua-redis')
+URL = require "socket.url"
+http = require "socket.http"
+https = require "ssl.https"
+ltn12 = require "ltn12"
+json = (loadfile "./libs/JSON.lua")()
+mimetype = (loadfile "./libs/mimetype.lua")()
+JSON = (loadfile "./libs/dkjson.lua")()
+
+
 local lgi = require ('lgi')
 local notify = lgi.require('Notify')
 notify.init ("Telegram updates")
