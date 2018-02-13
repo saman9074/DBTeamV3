@@ -74,7 +74,7 @@ end
 
 function delete_msg(chat_id, msg_id)
 	msg_id = {[0] = msg_id}
-    tdcli_function ({
+    tdbot_function ({
     	ID = "DeleteMessages",
     	chat_id_ = chat_id,
     	message_ids_ = msg_id
