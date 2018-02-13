@@ -97,7 +97,8 @@ local function run(msg, matches)
 	elseif matches[1] ==  "hadis" then
 		local code = http.request('http://golden3.ir/bot/hadis.php')
 		local jdat = json:decode(code)
-		local text = jdat.0.hadis
+		local data = jdat.0
+		local text = data.hadis
 		send_msg(msg.to.id, text, 'html')
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
