@@ -93,18 +93,12 @@ local function run(msg, matches)
 		text = text..'\nغروب آفتاب: '..data.Sunset
 		text = text..'\nاذان مغرب: '..data.Maghrib
 		text = text..'\nعشاء : '..data.Isha
-		text = text..msg_caption
 		send_msg(msg.to.id, text, 'html')
-		send_msg(msg.to.id, "<b> ok <b>", 'html')
-	elseif matches[1] ==  "حدیث" then
-		local lat,lng,url	= get_staticmap(city)
-		local dumptime = run_bash('date +%s')
+	elseif matches[1] ==  "hadis" then
 		local code = http.request('http://golden3.ir/bot/hadis.php')
 		local jdat = json:decode(code)
-		
 		local text = jdat.0.hadis
 		send_msg(msg.to.id, text, 'html')
-			
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
 			get_msg_info(msg.to.id, msg.reply_id, infofile, matches[2])			
@@ -244,7 +238,7 @@ return {
         patterns = {
 				"^[!/#](%S+) (.*)$",
 				'^[!/#](azan) (.*)$',
-				'^[!/#](حدیث)$',
+				'^[!/#](hadis)$',
 				"^[!/#](.*)$"				
 				},
     run = run
