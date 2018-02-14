@@ -103,7 +103,6 @@ local function run(msg, matches)
 		if matches[2] then
 			local code = http.request('http://golden3.ir/bot/hadis.php?t=1&sub=')
 			send_msg(msg.to.id, code, 'html')
-
 		elseif not matches[2] then
 			local code2 = http.request('http://golden3.ir/bot/hadis.php?t=1')
 			send_msg(msg.to.id, code2, 'html')
@@ -246,8 +245,9 @@ end
 return {
         patterns = {
 				"^[!/#](%S+) (.*)$",
-				'^[!/#](azan) (.*)$',
+				'^[!/#](اذان) (.*)$',
 				'^[!/#](اذان)$',
+				'^[!/#](حدیث) (.*)$',
 				"^[!/#](حدیث)$",
 				"^[!/#](.*)$"				
 				},
