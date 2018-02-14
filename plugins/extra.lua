@@ -98,6 +98,7 @@ local function run(msg, matches)
 		text = text..'\nغروب آفتاب: '..data.Sunset
 		text = text..'\nاذان مغرب: '..data.Maghrib
 		text = text..'\nعشاء : '..data.Isha
+		text = text..'\n#azan #اذان'
 		send_msg(msg.to.id, text, 'html')
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
