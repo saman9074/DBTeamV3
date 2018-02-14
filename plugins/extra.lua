@@ -102,11 +102,10 @@ local function run(msg, matches)
 	elseif matches[1] ==  "حدیث" then
 		if matches[2] then
 			local code = http.request('http://golden3.ir/bot/hadis.php?t=1&sub='..matches[2])
-			send_msg(msg.to.id, code, 'html')
 		elseif not matches[2] then
 			local code = http.request('http://golden3.ir/bot/hadis.php?t=1')
-			send_msg(msg.to.id, code, 'html')
 		end
+		send_msg(msg.to.id, code, 'html')
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
 			get_msg_info(msg.to.id, msg.reply_id, infofile, matches[2])			
