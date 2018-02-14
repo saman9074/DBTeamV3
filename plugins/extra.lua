@@ -101,7 +101,7 @@ local function run(msg, matches)
 		send_msg(msg.to.id, text, 'html')
 	elseif matches[1] ==  "حدیث" then
 		if matches[2] then
-			local code = http.request('http://golden3.ir/bot/hadis.php?t=1&sub='..matches[2])
+			local code = http.request('http://golden3.ir/bot/hadis.php?t=1&sub=')
 		elseif not matches[2] then
 			local code = http.request('http://golden3.ir/bot/hadis.php?t=1')
 		end
