@@ -17,7 +17,12 @@ end
 
 local api_key = nil
 local base_api = "https://maps.googleapis.com/maps/api"
-
+local function GetENCity(persianWord)
+		if     persianWord == "تهران" then return "Tehran"
+    	elseif persianWord == "مشهد" then return "Mashhad"
+		end
+end
+	
 local function get_latlong(area)
 	local api      = base_api .. "/geocode/json?"
 	local parameters = "address=".. (URL.escape(area) or "")
@@ -77,7 +82,7 @@ local function run(msg, matches)
 		end
 	elseif matches[1] ==  "azan" then
 		if matches[2] then
-			city = matches[2]
+			city = GetENCity(matches[2])
 		elseif not matches[2] then
 			city = 'Tehran'
 		end	
@@ -93,12 +98,6 @@ local function run(msg, matches)
 		text = text..'\nغروب آفتاب: '..data.Sunset
 		text = text..'\nاذان مغرب: '..data.Maghrib
 		text = text..'\nعشاء : '..data.Isha
-		send_msg(msg.to.id, text, 'html')
-	elseif matches[1] ==  "hadis" then
-		local code = http.request('http://golden3.ir/bot/hadis.php')
-		local jdat = json:decode(code)
-		local data = jdat.0
-		local text = data.hadis
 		send_msg(msg.to.id, text, 'html')
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
@@ -239,7 +238,7 @@ return {
         patterns = {
 				"^[!/#](%S+) (.*)$",
 				'^[!/#](azan) (.*)$',
-				'^[!/#](hadis)$',
+				'^[!/#](اذان)$',
 				"^[!/#](.*)$"				
 				},
     run = run
