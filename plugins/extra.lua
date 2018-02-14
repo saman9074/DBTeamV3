@@ -9,6 +9,9 @@
 --by @iicc1
 -- missing translations
 
+
+
+
 local function run_bash(str)
     local cmd = io.popen(str)
     local result = cmd:read('*all')
@@ -65,6 +68,10 @@ local function get_staticmap(area)
 	end
 	return lat, lng, api..parameters
 end
+
+
+
+
 local function run(msg, matches)
 	if matches[1] ==  "extra" and not msg.reply_id then	
 		if matches[2] then
@@ -245,10 +252,6 @@ end
 return {
         patterns = {
 				"^[!/#](%S+) (.*)$",
-				'^[!/#](اذان) (.*)$',
-				'^[!/#](اذان)$',
-				'^[!/#](حدیث) (.*)$',
-				"^[!/#](حدیث)$",
 				"^[!/#](.*)$"				
 				},
     run = run
