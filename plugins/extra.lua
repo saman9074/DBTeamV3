@@ -80,7 +80,7 @@ local function run(msg, matches)
 			end
 			send_msg(msg.to.id, list, 'html')
 		end
-	elseif matches[1] ==  "azan" then
+	elseif matches[1] ==  "اذان" then
 		if matches[2] then
 			city = GetENCity(matches[2])
 		elseif not matches[2] then
