@@ -98,8 +98,10 @@ local function run(msg, matches)
 		text = text..'\nغروب آفتاب: '..data.Sunset
 		text = text..'\nاذان مغرب: '..data.Maghrib
 		text = text..'\nعشاء : '..data.Isha
-		text = text..'\n#azan #اذان'
 		send_msg(msg.to.id, text, 'html')
+	elseif matches[1] ==  "اذان" then
+		local code = http.request('http://golden3.ir/bot/hadis.php')
+		send_msg(msg.to.id, code, 'html')
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
 			get_msg_info(msg.to.id, msg.reply_id, infofile, matches[2])			
