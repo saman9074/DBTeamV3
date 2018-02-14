@@ -99,7 +99,7 @@ local function run(msg, matches)
 		text = text..'\nاذان مغرب: '..data.Maghrib
 		text = text..'\nعشاء : '..data.Isha
 		send_msg(msg.to.id, text, 'html')
-	elseif matches[1] ==  "اذان" then
+	elseif matches[1] ==  "حدیث" then
 		local code = http.request('http://golden3.ir/bot/hadis.php')
 		send_msg(msg.to.id, code, 'html')
 	elseif matches[1] ==  "extra" and  msg.reply_id then
@@ -242,6 +242,7 @@ return {
 				"^[!/#](%S+) (.*)$",
 				'^[!/#](azan) (.*)$',
 				'^[!/#](اذان)$',
+				"^[!/#](حدیث)$",
 				"^[!/#](.*)$"				
 				},
     run = run
