@@ -18,6 +18,29 @@ function send_msg(chat_id, text, parse)
 
 end
 
+
+function send_msg_web(chat_id, text, parse)
+    assert( tdbot_function ({
+    	_ = "sendMessage",
+    	chat_id = chat_id,
+    	reply_to_message_id = 0,
+    	disable_notification = 0,
+    	from_background = 1,
+    	reply_markup = nil,
+    	input_message_content = {
+    		_ = "inputMessageText",
+    		text = text,
+    		disable_web_page_preview = 0,
+    		clear_draft = 0,
+    		parse_mode = getParse(parse),
+    		entities = {}
+    	}
+    }, dl_cb, nil))
+
+end
+
+
+
 function reply_msg(chat_id, text, msg_id, parse)
     tdbot_function ({
     	_ = "sendMessage",
@@ -65,13 +88,12 @@ end
 
 function delete_msg(chat_id, msg_id)
 	msg_id = {[0] = msg_id}
-   tdbot_function ({
+    tdbot_function ({
     	_ = "deleteMessages",
     	chat_id = chat_id,
     	message_ids = msg_id
     }, dl_cb, nil)
 end
-
 
 function getParse(parse)
 	if parse  == 'md' then
