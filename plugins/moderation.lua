@@ -43,7 +43,7 @@ local function pre_process(msg)
 			delete_msg(msg.to.id, msg.id)
 			if not redis:get("muted:alert:" .. msg.to.id .. ":" .. msg.from.id) then
 				redis:setex("muted:alert:" .. msg.to.id .. ":" .. msg.from.id, 300, true)
-				send_msg(msg.to.id, 'Trying to speak...', 'md')
+				--send_msg(msg.to.id, 'Trying to speak...', 'md')
 			end
 		end
 	end
@@ -61,12 +61,12 @@ end
 
 local function run(msg, matches)
   if redis:get("moderation_group: " .. msg.to.id) then
-	if matches[1] == "del" and not matches[2] then
+	if matches[1] == "del" or matches[1] == "حذف" and not matches[2] then
 		if permissions(msg.from.id, msg.to.id, "rem_history") and msg.reply_id then
 			delete_msg(msg.to.id, msg.reply_id)
 		end
 		delete_msg(msg.to.id, msg.id)
-	elseif matches[1] == "ban" then
+	elseif matches[1] == "ban" or matches[1] == "بن" then
 		if not matches[2] and msg.reply_id then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'banUser'):gsub("$id", msg.replied.id), "md")
@@ -91,7 +91,7 @@ local function run(msg, matches)
 		    redis:setex("ban:" .. msg.to.id .. ":" .. msg.replied.id, matches[2], true)
 		    removeFromBanList(msg.to.id, msg.replied.id)
 		end
-	elseif matches[1] == "unban" then
+	elseif matches[1] == "unban" or matches[1] == "انبن" then
 		if not matches[2] and msg.reply_id ~= 0 then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'unbanUser'):gsub("$id", msg.replied.id), "md")
@@ -111,7 +111,7 @@ local function run(msg, matches)
 	    elseif not is_number(matches[2]) and matches[2] then
 			resolve_username(matches[2], resolve_cb, {chat_id = msg.to.id, superior = msg.from.id, plugin_tag = "moderation", command = "unban"})
 		end
-	elseif matches[1] == "kick" then
+	elseif matches[1] == "kick" or matches[1] == "کیک" then
 		if not matches[2] and msg.reply_id ~= 0 then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'kickUser'):gsub("$id", msg.replied.id), "md")
@@ -131,7 +131,7 @@ local function run(msg, matches)
 	    elseif not is_number(matches[2]) and matches[2] then
 	    	resolve_username(matches[2], resolve_cb, {chat_id = msg.to.id, superior = msg.from.id, plugin_tag = "moderation", command = "kick"})
 	    end	    
-	elseif matches[1] == "gban" then
+	elseif matches[1] == "gban" or matches[1] == "جیبن" then
 		if not matches[2] and msg.reply_id then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'gbanUser'):gsub("$id", msg.replied.id), "md")
@@ -151,7 +151,7 @@ local function run(msg, matches)
 	    elseif not is_number(matches[2]) and matches[2] then
 			resolve_username(matches[2], resolve_cb, {chat_id = msg.to.id, superior = msg.from.id, plugin_tag = "moderation", command = "gban"})
 		end
-	elseif matches[1] == "ungban" then
+	elseif matches[1] == "ungban" or matches[1] == "انجیبن" then
 		if not matches[2] and msg.reply_id ~= 0 then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'ungbanUser'):gsub("$id", msg.replied.id), "md")
@@ -169,7 +169,7 @@ local function run(msg, matches)
 	    elseif not is_number(matches[2]) and matches[2] then
 			resolve_username(matches[2], resolve_cb, {chat_id = msg.to.id, superior = msg.from.id, plugin_tag = "moderation", command = "ungban"})
 		end
-	elseif matches[1] == "mute" then	
+	elseif matches[1] == "mute" or matches[1] == "سکوت" then	
 		if not matches[2] and msg.reply_id then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'muteUser'):gsub("$id", msg.replied.id), "md")
@@ -194,7 +194,7 @@ local function run(msg, matches)
 	    elseif not is_number(matches[2]) and matches[2] then
 	    	resolve_username(matches[2], resolve_cb, {chat_id = msg.to.id, superior = msg.from.id, plugin_tag = "moderation", command = "mute"})
 	    end	
-	elseif matches[1] == "unmute" then
+	elseif matches[1] == "unmute" or matches[1] == "حذفسکوت" then
 		if not matches[2] and msg.reply_id then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'unmuteUser'):gsub("$id", msg.replied.id), "md")
@@ -212,7 +212,7 @@ local function run(msg, matches)
 	    elseif not is_number(matches[2]) and matches[2] then
 	    	resolve_username(matches[2], resolve_cb, {chat_id = msg.to.id, superior = msg.from.id, plugin_tag = "moderation", command = "unmute"})
 	    end
-	elseif matches[1] == "muteall" then
+	elseif matches[1] == "muteall" or matches[1] == "سکوتهمه" then
 		if is_number(matches[2]) then
 			if permissions(msg.from.id, msg.to.id, "moderation") then
 				send_msg(msg.to.id, lang_text(msg.to.id, 'muteChatSec') .. matches[2] .. " *secs.*", "md")
@@ -224,7 +224,7 @@ local function run(msg, matches)
 				redis:set("muteall:" .. msg.to.id, true)
 			end
 		end
-	elseif matches[1] == "unmuteall" then
+	elseif matches[1] == "unmuteall" or matches[1] == "حذفسکوتهمه" then
 		if permissions(msg.from.id, msg.to.id, "moderation") then
 			send_msg(msg.to.id, lang_text(msg.to.id, 'unmuteChat'), "md")
 			redis:del("muteall:" .. msg.to.id)
@@ -236,7 +236,7 @@ local function run(msg, matches)
 			end
 			send_msg(msg.to.id, lang_text(msg.to.id, 'delAll'), 'md')
 		end
-	elseif matches[1] == "delall" and msg.reply_id then
+	elseif matches[1] == "delall" or matches[1] == "حذفهمه" and msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "rem_history") then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				delete_msg_user(msg.to.id, msg.replied.id)
@@ -244,7 +244,7 @@ local function run(msg, matches)
 				send_msg(msg.to.id, lang_text(msg.to.id, 'delAll'), 'md')
 			end
 		end
-	elseif matches[1] == "del" and matches[2] and msg.reply_id then
+	elseif matches[1] == "del" or matches[1] == "حذف" and matches[2] and msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "rem_history") then
 			if compare_permissions(msg.to.id, msg.from.id, msg.replied.id) then
 				chat_history(msg.to.id, msg.reply_id, 0, tonumber(matches[2]), history_cb, msg.to.id)
@@ -261,6 +261,7 @@ end
 
 return {
   	patterns = {
+		--english--
 		"^[!/#](del)$",
 		"^[!/#](del) (.*)$",
 		"^[!/#](delall)$",
@@ -280,7 +281,28 @@ return {
 		"^[!/#](unmute) (.*)$",
 		"^[!/#](muteall)$",
 		"^[!/#](unmuteall)$",
-		"^[!/#](muteall) (.*)$"
+		"^[!/#](muteall) (.*)$",
+		--persian--
+		"^(حذف)$",
+		"^(حذف) (.*)$",
+		"^(حذفهمه)$",
+	    "^(بن) (.*)$",
+	    "^(بن)$",
+	    "^(جیبن) (.*)$",
+	    "^(جیبن)$",
+	    "^(انبن) (.*)$",
+	    "^(انجیبن)$",
+	    "^(انجیبن) (.*)$",
+	    "^(انبن)$",
+	    "^(کیک) (.*)$",
+	    "^(کیک)$",
+	    "^(سکوت)$",
+		"^(سکوت) (.*)$",
+	    "^(حذفسکوت)$",
+		"^(حذفسکوت) (.*)$",
+		"^(سکوتهمه)$",
+		"^(حذفسکوتهمه)$",
+		"^(سکوتهمه) (.*)$"
   	},
   	run = run,
   	pre_process = pre_process
