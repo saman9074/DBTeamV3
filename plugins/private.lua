@@ -18,6 +18,9 @@ local function run(msg, matches)
     elseif matches[1] == "creategroup" and matches[2] and permissions(msg.from.id, msg.to.id, "creategroup") then
 		createNewGroupChat({[0] = msg.from.id}, matches[2], groupcb)
 	end
+	elseif matches[1] == "good" and not matches[2] and permissions(msg.from.id, msg.to.id, "creategroup") then
+		send_msg(msg.to.id, "i'm OK, thanks :)", "md")
+	end
 end
 
 function groupcb(extra,data)
@@ -47,6 +50,7 @@ return {
         patterns = {
                 "^[!/#]([sS][tT][Aa][rR][tT])",
 				"^[!/#]([Hh][eE][Ll][pP])",
+				"^[!/#]([Gg]ood)",
 				"^[!/#]([Cc]reategroup) (.*)"
         },
         run = run,
