@@ -16,18 +16,17 @@ require('utils')
 require("permissions")
 require('methods')
 
+
+
+
 tdcli = dofile('./tg/tdcli.lua')
-serpent = (loadfile "./libs/serpent.lua")()
-feedparser = (loadfile "./libs/feedparser.lua")()
-require('./bot/utils')
-require('./libs/lua-redis')
 URL = require "socket.url"
 http = require "socket.http"
 https = require "ssl.https"
 ltn12 = require "ltn12"
 json = (loadfile "./libs/JSON.lua")()
-mimetype = (loadfile "./libs/mimetype.lua")()
-JSON = (loadfile "./libs/dkjson.lua")()
+local JSON = require 'dkjson'
+
 
 
 local lgi = require ('lgi')
@@ -83,8 +82,8 @@ function create_config()
         enabled_lang = {
             "english_lang"
         },
-        our_id = {55670780, 122630959},
-        sudo_users = {55670780, 122630959}
+        our_id = {0},
+        sudo_users = {0}
     }
     serialize_to_file(config, './data/config.lua')
     print ('saved config into ./data/config.lua')
