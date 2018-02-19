@@ -117,7 +117,7 @@ local function run(msg, matches)
 	elseif matches[1] ==  "مداحی" then
 			if matches[2] == "فاطمیه" then
 				local code = http.request('http://golden3.ir/bot/madahi.php?t=2&sub=fatemie')
-				send_msg_web(msg.to.id, "دانلود مداحی شهادت حضرت فاطمه الزهرا (س) \n کانال مسجد و حسینیه فاطمه الزهرا \n @fatemehalzahra_com \n\n دانلود توسط لینک حمایتی: \n"..code, 'html')			
+				send_msg_web(msg.to.id, "دانلود مداحی شهادت حضرت فاطمه الزهرا (س)"..code, 'html')			
 			end
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
