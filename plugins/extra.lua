@@ -119,6 +119,11 @@ local function run(msg, matches)
 				local code = http.request('http://golden3.ir/bot/madahi.php?t=2&sub=fatemie')
 				send_msg_web(msg.to.id, "دانلود مداحی شهادت حضرت فاطمه الزهرا (س)"..code, 'html')			
 			end
+	elseif matches[1] ==  "opizo" then
+			if matches[2] then
+				local code = http.request('http://golden3.ir/bot/opizo.php?link='..matches[2])
+				send_msg_web(msg.to.id, code, 'md')			
+			end
 	elseif matches[1] ==  "extra" and  msg.reply_id then
 		if permissions(msg.from.id, msg.to.id, "mod_commands") then
 			get_msg_info(msg.to.id, msg.reply_id, infofile, matches[2])			
@@ -259,6 +264,7 @@ return {
 				"^[!/#](%S+) (.*)$",
 				"^[!/#](اذان) (.*)$",
 				"^[!/#](حدیث) (.*)$",
+				"^[!/#](opizo) (.*)$",
 				"^[!/#](مداحی) (.*)$",
 				"^[!/#](اذان)$",
 				"^[!/#](حدیث)$",
