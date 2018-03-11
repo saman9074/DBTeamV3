@@ -1,589 +1,561 @@
-function send_msg(chat_id, text, parse)
-    assert( tdbot_function ({
-    	_ = "sendMessage",
-    	chat_id = chat_id,
-    	reply_to_message_id = 0,
-    	disable_notification = 0,
-    	from_background = 1,
-    	reply_markup = nil,
-    	input_message_content = {
-    		_ = "inputMessageText",
-    		text = text,
-    		disable_web_page_preview = 1,
-    		clear_draft = 0,
-    		parse_mode = getParse(parse),
-    		entities = {}
-    	}
-    }, dl_cb, nil))
+serpent = require("serpent")
 
+--json = (loadfile "./libs/JSON.lua")()
+
+
+function download_to_file(url, file_name)
+  -- print to server
+  -- print("url to download: "..url)
+  -- uncomment if needed
+  local respbody = {}
+  local options = {
+    url = url,
+    sink = ltn12.sink.table(respbody),
+    redirect = true
+}
+
+  -- nil, code, headers, status
+  local response = nil
+
+  if url:starts('https') then
+    options.redirect = false
+    response = {https.request(options)}
+  else
+    response = {http.request(options)}
+  end
+
+  local code = response[2]
+  local headers = response[3]
+  local status = response[4]
+
+  if code ~= 200 then return nil end
+
+  file_name = file_name or get_http_file_name(url, headers)
+
+  local file_path = "data/"..file_name
+  -- print("Saved to: "..file_path)
+	-- uncomment if needed
+  file = io.open(file_path, "w+")
+  file:write(table.concat(respbody))
+  file:close()
+
+  return file_path
 end
 
 
-function send_msg_web(chat_id, text, parse)
-    assert( tdbot_function ({
-    	_ = "sendMessage",
-    	chat_id = chat_id,
-    	reply_to_message_id = 0,
-    	disable_notification = 0,
-    	from_background = 1,
-    	reply_markup = nil,
-    	input_message_content = {
-    		_ = "inputMessageText",
-    		text = text,
-    		disable_web_page_preview = 0,
-    		clear_draft = 0,
-    		parse_mode = getParse(parse),
-    		entities = {}
-    	}
-    }, dl_cb, nil))
+-- DEPRECATED!!!!!
+function string.starts(String, Start)
+  -- print("string.starts(String, Start) is DEPRECATED use string:starts(text) instead")
+  -- uncomment if needed
+  return Start == string.sub(String,1,string.len(Start))
+end
 
+-- Returns true if String starts with Start
+function string:starts(text)
+  return text == string.sub(self,1,string.len(text))
 end
 
 
 
-function reply_msg(chat_id, text, msg_id, parse)
-    tdbot_function ({
-    	_ = "sendMessage",
-    	chat_id = chat_id,
-    	reply_to_message_id = msg_id,
-    	disable_notification = 0,
-    	from_background = 1,
-    	reply_markup = nil,
-    	input_message_content = {
-    		_ = "inputMessageText",
-    		text = text,
-    		disable_web_page_preview = 1,
-    		clear_draft = 0,
-    		parse_mode = getParse(parse),
-    		entities = {}
-    	}
-    }, dl_cb, nil)
+function dl_cb (arg, data)
+    vardump (data)
 end
 
-function createNewGroupChat(user_ids, title, cb, cmd)
-  	tdbot_function ({
-    _ = "createNewGroupChat",
-	    user_ids = user_ids, -- vector
-	    title = title
-  	}, cb or dl_cb, cmd)
-end
+function vardump(value, depth, key)
+    local linePrefix = ""
+    local spaces = ""
 
-function migrateGroupChatToChannelChat(chat_id, cb, cmd)
-  	tdbot_function ({
-	    ID = "migrateGroupChatToChannelChat",
-	    chat_id = chat_id
-  	}, cb or dl_cb, cmd)
-end
+    if key ~= nil then
+        linePrefix = "["..key.."] = "
+    end
 
-function changeChatMemberStatus(chat_id, user_id, status, cb, cmd)
-  	tdbot_function ({
-	    _ = "changeChatMemberStatus",
-	    chat_id = chat_id,
-	    user_id = user_id,
-	    status = {
-	      _ = "chatMemberStatus" .. status
-	    },
-  	}, cb or dl_cb, cmd)
-end
-
-function delete_msg(chat_id, msg_id)
-	msg_id = {[0] = msg_id}
-    tdbot_function ({
-    	_ = "deleteMessages",
-    	chat_id = chat_id,
-    	message_ids = msg_id
-    }, dl_cb, nil)
-end
-
-function getParse(parse)
-	if parse  == 'md' then
-		return {_ = "textParseModeMarkdown"}
-	elseif parse == 'html' then
-		return {_ = "textParseModeHTML"}
-	else
-		return nil
-	end
-end
-
-function sendRequest(request_id, chat_id, reply_to_message_id, disable_notification, from_background, reply_markup, input_message_content, callback, extra)
-  	tdbot_function ({
-	    _ = request_id,
-	    chat_id = chat_id,
-	    reply_to_message_id = reply_to_message_id,
-	    disable_notification = disable_notification,
-	    from_background = from_background,
-	    reply_markup = reply_markup,
-	    input_message_content = input_message_content,
-	}, callback or dl_cb, extra)
-end
-
-function add_user(chat_id, user_id)
-  	tdbot_function ({
-    	_ = "addChatMember",
-    	chat_id = chat_id,
-    	user_id = user_id,
-    	forward_limit = 0
-  	}, dl_cb, extra)
-end
-
-function mark_as_read(chat_id, message_ids)
-  	tdbot_function ({
-    	_ = "ViewMessages",
-    	chat_id = chat_id,
-    	message_ids = message_ids
-  	}, dl_cb, extra)
-end
-
-function get_msg_info(chat_id, message_id, cb_function, extra)
-  	tdbot_function ({
-    	_ = "getMessage",
-    	chat_id = chat_id,
-    	message_id = message_id
-  	}, cb_function, extra)
-end
-
-function getChats(offset_order, offset_chat_id, limit, cb, cmd)
-  	if not limit or limit > 20 then
-    	limit = 20
-  	end
-	tdbot_function ({
-	    _ = "getChats",
-	    offset_order = offset_order or 9223372036854775807,
-	    offset_chat_id = offset_chat_id or 0,
-	    limit = limit
-  	}, cb or dl_cb, cmd)
-end
-
-function getMe(cb, cmd)
-  	tdbot_function ({
-    	_ = "getMe",
-  	}, cb or dl_cb, cmd)
-end
-
-function getMeCb(extra, result)
-	our_id = result.id
-	print("Our id: "..our_id)
-	file = io.open("./data/config.lua", "r")
-	config = ''
-	repeat
-		line = file:read ("*l")
-		if line then
-			line = string.gsub(line, "0", our_id)
-			config = config.."\n"..line
-		end
-	until not line
-		
-	file:close()
-	file = io.open("./data/config.lua", "w")
-	file:write(config)
-	file:close()	
-end
-
-function changeAbout(about, cb, cmd)
- 	tdbot_function ({
-    	_ = "changeAbout",
-    	about = about
-  	}, cb or dl_cb, cmd)
-end
-
-function pin_msg(channel_id, message_id, disable_notification)
-  	tdbot_function ({
-    	_ = "pinChannelMessage",
-    	channel_id = getChatId(channel_id)._,
-    	message_id = message_id,
-    	disable_notification = disable_notification
-  	}, dl_cb, nil)
-end
-
-function openChat(chat_id, cb, cmd)
-	tdbot_function ({
-    	_ = "openChat",
-    	chat_id = chat_id
-	}, cb or dl_cb, cmd)
-end
-
-function kick_user(chat_id, user_id)
-  	tdbot_function ({
-    	_ = "changeChatMemberStatus",
-    	chat_id = chat_id,
-    	user_id = user_id,
-    	status = {
-      		_ = "chatMemberStatusBanned"
-    	},
-  	}, dl_cb, nil)
-end
-
-function promoteToAdmin(chat_id, user_id)
-  	tdbot_function ({
-    	_ = "changeChatMemberStatus",
-    	chat_id = chat_id,
-    	user_id = user_id,
-    	status = {
-      		_ = "chatMemberStatusAdministrator"
-    	},
-  	}, dl_cb, nil)
-end
-
-function removeFromBanList(chat_id, user_id)
-    tdbot_function ({
-		_ = "changeChatMemberStatus",
-		chat_id = chat_id,
-		user_id = user_id,
-		status = {
-			_ = "chatMemberStatusLeft"
-      	},
-    }, dl_cb, nil)
-end
-
-function addChatMember(chat_id, user_id)
-	tdbot_function ({
-		_ = "addChatMember",
-		chat_id = chat_id,
-		user_id = user_id,
-		forward_limit = 50
-	}, cb or dl_cb, nil)
-end
-
-function resolve_username(username, cb_function, cb_extra)
-    tdbot_function ({
-        _ = "searchPublicChat",
-        username = username
-    }, cb_function, cb_extra)
-end
-
-function resolve_cb(extra, user)
-	if compare_permissions(extra.chat_id, extra.superior, user.id) then
-		if extra.command == "ban" then
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'banUser'):gsub("$id", user.id), "md")
-			kick_user(extra.chat_id, user.id)
-			redis:set("ban:" .. extra.chat_id .. ":" .. user.id, true)
-		elseif extra.command == "unban" then		
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'unbanUser'):gsub("$id", user.id), "md")
-			redis:del("ban:" .. extra.chat_id .. ":" .. user.id)
-			removeFromBanList(extra.chat_id, user.id)
-		elseif extra.command == "kick" then		
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'kickUser'):gsub("$id", user.id), "md")
-			kick_user(extra.chat_id, user.id)
-      		removeFromBanList(extra.chat_id, user.id)
-		elseif extra.command == "gban" then		
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'gbanUser'):gsub("$id", user.id), "md")
-			kick_user(extra.chat_id, user.id)
-			redis:sadd("gbans", user.id)
-		elseif extra.command == "ungban" then		
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'unbanUser'):gsub("$id", user.id), "md")
-			redis:srem("gbans", user.id)
-		elseif extra.command == "mute" then
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'muteUser'):gsub("$id", user.id), "md")
-			redis:set("muted:" .. extra.chat_id .. ":" .. user.id, true)
-		elseif extra.command == "unmute" then
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'unmuteUser'):gsub("$id", user.id), "md")
-			redis:del("muted:" .. extra.chat_id .. ":" .. user.id)
-		elseif extra.command == "admin" then
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'newAdmin') .. ": @" .. (user.type_.user_.username_ or user.type_.user_.first_name_), "html")
-			redis:sadd('admins', user.id)
-			redis:srem('mods:'..extra.chat_id, user.id)
-      		redis:hset('bot:ids',user.id, '@'.. user.type_.user_.username_)
-		elseif extra.command == "mod" then
-			send_msg(extra.chat_id, lang_text(extra.chat_id, 'newMod') .. ": @" .. (user.type_.user_.username_ or user.type_.user_.first_name_), "html")
-			redis:sadd('mods:'..extra.chat_id, user.id)
-			if new_is_sudo(extra.superior) then
-				redis:srem('admins', user.id)
-			end
-      		redis:hset('bot:ids',user.id, '@'.. user.type_.user_.username_)
-		elseif extra.command == "user" then
-			if new_is_sudo(extra.superior) then
-				redis:srem('mods:'..extra.chat_id, user.id)
-				redis:srem('admins', user.id)
-			elseif is_admin(extra.superior) then
-				redis:srem('mods:'..extra.chat_id, user.id)
-			end
-			send_msg(extra.chat_id, "<code>></code> @" .. (user.type_.user_.username_ or user.type_.user_.first_name_) .. "" ..  lang_text(extra.chat_id, 'nowUser'), "html")
-		end
-	else
-		permissions(extra.superior, extra.chat_id, extra.plugin_tag)
-	end
-end
-
-function resolve_id(user_id, cb_function, cb_extra)
-    tdbot_function ({
-        _ = "getUserFull",
-        user_id = user_id
-    }, cb_function, cb_extra)
-end
-
-function getChat(chat_id, cb, cmd)
-	tdbot_function ({
-    	_ = "getChat",
-    	chat_id = chat_id
-	}, cb or dl_cb, cmd)
-end
-
-function getChannelMembers(channel_id, offset, filter, limit, cb_function, cb_extra)
-	if not limit or limit > 200 then
-		limit = 200
-	end
-
-	tdbot_function ({
-    	_ = "getChannelMembers",
-    	channel_id = getChatId(channel_id)._,
-    	filter = {
-      		_ = "channelMembersFilter" .. filter
-    	},
-    	offset = offset,
-    	limit = limit
-  	}, cb_function or cb_function, cb_extra)
-end
-
-function forward_msg(chat_id, from_chat_id, message_id)
-    message_id = {[0] = message_id}
-    tdbot_function ({
-        _ = "forwardMessages",
-        chat_id = chat_id,
-        from_chat_id = from_chat_id,
-        message_ids = message_id,
-        disable_notification = 0,
-        from_background = 1
-    }, dl_cb, nil)
-end
-
-function kick_resolve_cb(extra, user)
-    if compare_permissions(extra.chat_id, extra.superior, user.id) then
-        tdbot_function ({
-            _ = "changeChatMemberStatus",
-            chat_id = tonumber(extra.chat_id),
-            user_id = user.id,
-            status = {
-                _ = "chatMemberStatusKicked"
-            },
-        }, dl_cb, nil)
+    if depth == nil then
+        depth = 0
     else
-        send_msg(extra.chat_id, 'error', 'md')
+        depth = depth + 1
+        for i=1, depth do spaces = spaces .. "  " end
     end
-end
 
-function kick_resolve(chat_id, username, extra)
-    resolve_username(username, kick_resolve_cb, {chat_id = chat_id, superior = extra})
-end
-
-function redisunban_by_reply_cb(channel_id, msg)
-    redis:del("ban:" .. channel_id .. ":" .. msg.sender_user_id_)
-end
-
-function redisunban_by_reply(channel_id, message_id)
-    get_msg_info(channel_id, message_id, redisunban_by_reply_cb, channel_id)
-end
-
-function redisban_resolve_cb(extra, user)
-    if compare_permissions(extra.chat_id, extra.superior, user.id) then
-        redis:set("ban:" .. extra.chat_id .. ":" .. user.id, true)
-    end
-end
-
-function redisban_resolve(chat_id, username, superior)
-    local extra = {}
-    resolve_username(username, redisban_resolve_cb, {chat_id = chat_id, superior = superior})
-end
-
-function redisgban_resolve_cb(chat_id, user)
-    redis:sadd("gbans", user.id)
-end
-
-function redisgban_resolve(chat_id, username)
-    resolve_username(username, redisgban_resolve_cb, chat_id)
-end
-
-function redisgban_resolve_cb(chat_id, user)
-    redis:srem("gbans", user.id)
-end
-
-function redisgban_resolve(chat_id, username)
-    resolve_username(username, redisgban_resolve_cb, chat_id)
-end
-
-function redisunban_resolve_cb(extra, user)
-    if compare_permissions(extra.chat_id, extra.superior, user.id) then
-        redis:del("ban:" .. extra.chat_id .. ":" .. user.id)
-    end
-end
-
-function redisunban_resolve(chat_id, username, superior)
-    resolve_username(username, redisunban_resolve_cb, {chat_id = chat_id, superior = superior})
-end
-
-function redismute_resolve_cb(chat_id, user)
-    redis:set("muted:" .. chat_id .. ":" .. user.id, true)
-end
-
-function redismute_resolve(chat_id, username)
-    resolve_username(username, redismute_resolve_cb, chat_id)
-end
-
-function redisunmute_resolve_cb(chat_id, user)
-    redis:del("muted:" .. chat_id .. ":" .. user.id)
-end
-
-function redisunmute_resolve(chat_id, username)
-    resolve_username(username, redisunmute_resolve_cb, chat_id)
-end
-
-function getInputFile(file)
-    if file:match('/') then
-        infile = {_ = "InputFileLocal", path = file}
-    elseif file:match('^%d+$') then
-        infile = {_ = "InputFileId", id = file}
+    if type(value) == 'table' then
+        mTable = getmetatable(value)
+        if mTable == nil then
+            print(spaces ..linePrefix.."(table) ")
+        else
+            print(spaces .."(metatable) ")
+            value = mTable
+        end
+        for tableKey, tableValue in pairs(value) do
+            vardump(tableValue, depth, tableKey)
+        end
+    elseif type(value)  == 'function' or type(value) == 'thread' or type(value) == 'userdata' or value == nil then
+        print(spaces..tostring(value))
     else
-        infile = {_ = "InputFilePersistentId", persistent_id = file}
+        print(spaces..linePrefix.."("..type(value)..") "..tostring(value))
     end
-    return infile
 end
 
-function sendSticker(chat_id, reply_to_message_id, disable_notification, from_background, reply_markup, sticker, cb, cmd)
-	local input_message_content = {
-    	_ = "inputMessageSticker",
-    	sticker = getInputFile(sticker),
-    	width = 0,
-    	height = 0
-  	}
-  	sendRequest('SendMessage', chat_id, reply_to_message_id, disable_notification, from_background, reply_markup, input_message_content, cb, cmd)
+function ok_cb(extra, success, result)
+
 end
 
-function send_document(chat_id, document)
-    tdbot_function ({
-    	_ = "sendMessage",
-    	chat_id = chat_id,
-    	reply_to_message_id = 0,
-    	disable_notification = 0,
-    	from_background = 1,
-    	reply_markup = nil,
-    	input_message_content = {
-            _ = "inputMessageDocument",
-            document = getInputFile(document),
-            caption = nil
-        },
-    }, dl_cb, cb_extra)
-end
-
-function sendSticker(chat_id, sticker)
-	local input_message_content = {
-    	_ = "inputMessageSticker",
-    	sticker = getInputFile(sticker),
-    	width = 0,
-    	height = 0
-  	}
-  	sendRequest('sendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function sendAnimation(chat_id, gif, caption)
-  	local input_message_content = {
-    	_ = "inputMessageAnimation",
-    	animation = getInputFile(gif),
-    	width = 0,
-    	height = 0,
-    	caption = caption
-  }
-  sendRequest('sendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function sendAudio(chat_id, audio, caption)
-  local input_message_content = {
-    _ = "inputMessageAudio",
-    audio = getInputFile(audio),
-    duration = duration or 0,
-    title = title or 0,
-    performer = performer,
-    caption = caption
-  }
-  sendRequest('sendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function sendDocument(chat_id, document, caption)
-	local input_message_content = {
-		_ = "inputMessageDocument",
-		document = getInputFile(document),
-		caption = caption
-	}
-	sendRequest('sendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function sendPhoto(chat_id, photo, caption)
-  local input_message_content = {
-    _ = "inputMessagePhoto",
-    photo = getInputFile(photo),
-    added_sticker_file_ids = {},
-    width = 0,
-    height = 0,
-    caption = caption
-  }
-  sendRequest('SendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function sendVideo(chat_id, video, caption)
-	local input_message_content = {
-		_ = "inputMessageVideo",
-    	video = getInputFile(video),
-    	added_sticker_file_ids = {},
-    	duration = duration or 0,
-    	width = width or 0,
-    	height = height or 0,
-    	caption = caption
-  	}
-  	sendRequest('sendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function sendVoice(chat_id, voice, caption)
-	local input_message_content = {
-    	_ = "inputMessageVoice",
-    	voice = getInputFile(voice),
-    	duration = duration or 0,
-    	waveform = waveform or 0,
-    	caption = caption
-  	}
-  	sendRequest('sendMessage', chat_id, 0, 0, 1, nil, input_message_content, cbsti)
-end
-
-function cbsti(a,b)
-	--vardump(a)
-	--vardump(b)
-end
-
-function export_link(chat_id, cb_function, cb_extra)
-    tdbot_function ({
-        _ = "exportChatInviteLink",
-        chat_id = chat_id
-    }, cb_function, cb_extra)
-end
-
-function checkChatInviteLink(link, cb, cmd)
-  	tdbot_function ({
-    	_ = "checkChatInviteLink",
-    	invite_link = link
-  	}, cb or dl_cb, cmd)
-end
-
-function getChannelFull(channel_id, cb, cmd)
-  	tdbot_function ({
-    	_ = "GetChannelFull",
-    	channel_id = getChatId(channel_id)._
-  	}, cb or dl_cb, cmd)
-end
-
-function chat_history(chat_id, from_message_id, offset, limit, cb_function, cb_extra)
-    if not limit or limit > 100 then
-        limit = 100
+function oldtg(data)
+    if data.message then
+        local msg = {}
+        msg.to = {}
+        msg.from = {}
+        msg.replied = {}
+        msg.to.id = data.message.chat_id
+        msg.from.id = data.message.sender_user_id
+        if data.message.content._ == "messageText" then
+            msg.text = data.message.content.text
+            if #data.message.content.entities ~= 0 then
+                for k, v in ipairs (data.message.content.entities) do
+                    if v.url_ then
+                        msg.text = msg.text .. " url: " .. v.url_
+                    end
+                end
+            end
+        end
+        if data.message.content.caption then
+            msg.text = data.message.content.caption
+        end
+        msg.date = data.message.date
+        msg.id = data.message.id
+        msg.unread = false
+        if data.message.reply_to_message_id == 0 then
+            msg.reply_id = false
+        else
+            msg.reply_id = data.message.reply_to_message_id
+        end
+        if data.message.content._ == "messagePhoto" then
+            msg.photo = true
+    		if data.message.content.photo.sizes[3] then 
+    			msg.file_id = data.message.content.photo.sizes[3].photo.persistent_id
+    		else
+    			msg.file_id = data.message.content.photo.sizes[0].photo.persistent_id
+    		end
+        else
+            msg.photo = false
+        end
+        if data.message.content._ == "messageSticker" then
+            msg.sticker = true
+    		msg.file_id = data.message.content.sticker.sticker.persistent_id
+        else
+            msg.sticker = false
+        end
+        if data.message.content._ == "messageAudio" then
+            msg.audio = true
+    		msg.file_id = data.message.content.audio.audio.persistent_id
+        else
+            msg.audio = false
+        end
+        if data.message.content._ == "messageVoice" then
+            msg.voice = true
+    		msg.file_id = data.message.content.voice.voice.persistent_id
+        else
+            msg.voice = false
+        end
+        if data.message.content._ == "messageAnimation" then
+            msg.gif = true
+    		msg.file_id = data.message.content.animation.animation.persistent_id
+        else
+            msg.gif = false
+        end
+        if data.message.content._ == "messageVideo" then
+            msg.video = true
+    		msg.file_id = data.message.content.video.video.persistent_id
+        else
+            msg.video = false
+        end
+        if data.message.content._ == "messageDocument" then
+            msg.document = true
+    		msg.file_id = data.message.content.document.document.persistent_id
+        else
+            msg.document = false
+        end
+        if data.message.content._ == "MessageGame" then
+            msg.game = true
+        else
+            msg.game = false
+        end
+    	if data.message.forward_info then
+    		msg.forward = true
+    		msg.forward = {}
+    		msg.forward.from_id = data.message.forward_info.sender_user_id
+    		msg.forward.msg_id = data.message.forward_info.data
+    	else
+    		msg.forward = false
+    	end
+        if data.message.content._ then
+            msg.action = data.message.content._
+        end
+        if data.message.content._ == "messageChatAddMembers" or data.message.content._ == "messageChatDeleteMember" or
+            data.message.content._ == "messageChatChangeTitle" or data.message.content._ == "messageChatChangePhoto" or
+            data.message.content._ == "messageChatJoinByLink" or data.message.content._ == "messageGameScore" then
+            msg.service = true
+        else
+            msg.service = false
+        end
+        local new_members = data.message.content.members
+        if new_members then
+            msg.added = {}
+            for i = 0, #new_members, 1 do
+                k = i+1
+                msg.added[k] = {}
+                msg.added[k].id = new_members[i].id
+                if new_members[i].username then
+                    msg.added[k].username = new_members[i].username
+                else
+                    msg.added[k].username = false
+                end
+                msg.added[k].first_name = new_members[i].first_name
+                if new_members[i].last_name then
+                    msg.added[k].last_name = new_members[i].last_name
+                else
+                    msg.added[k].last_name = false
+                end
+            end
+        end
+        return msg
     end
-    tdbot_function ({
-        _ = "getChatHistory",
-        chat_id = chat_id,
-        from_message_id = from_message_id,
-        offset = offset or 0,
-        limit = limit
-    }, cb_function, cb_extra)
+    return data
 end
 
-function delete_msg_user(chat_id, user_id)
-    tdbot_function ({
-        _ = "deleteMessagesFromUser",
-        chat_id = chat_id,
-        user_id = user_id
-    }, cb or dl_cb, nil)
+function user_data(msg, data)
+    if data.username then
+        msg.from.username = data.username
+    else
+        msg.from.username = false
+    end
+    msg.from.first_name = data.first_name
+    if data.last_name then
+        msg.from.last_name = data.last_name
+    else
+        msg.from.last_name = false
+    end
+    if msg.action == "messageChatJoinByLink" then
+        msg.added = {}
+        msg.added[1] = {}
+        msg.added[1].id = msg.from.id
+        msg.added[1].username = msg.from.username
+        msg.added[1].first_name = msg.from.fist_name
+        msg.added[1].last_name = msg.from.last_name
+    end
+    return msg
+end
+
+function reply_data(msg, data)
+    if data.username then
+        msg.replied.username = data.username
+    end
+    msg.replied.first_name = data.first_name
+    if data.last_name then
+        msg.replied.last_name = data.last_name
+    end
+    return msg
+end
+
+function return_media(msg)
+    if msg.photo then
+        return "MessagePhoto"
+    elseif msg.sticker then
+        return "MessageSticker"
+    elseif msg.audio then
+        return "MessageAudio"
+    elseif msg.voice then
+        return "MessageVoice"
+    elseif msg.gif then
+        return "MessageAnimation"
+    elseif msg.text then
+        return "MessageText"
+    elseif msg.service then
+        return "MessageService"
+    elseif msg.video then
+        return "MessageVideo"
+    elseif msg.document then
+        return "MessageDocument"
+    elseif msg.game then
+        return "MessageGame"
+    end
+end
+
+function serialize_to_file(data, file, uglify)
+    file = io.open(file, 'w+')
+    local serialized
+    if not uglify then
+        serialized = serpent.block(data, {
+            comment = false,
+            name = '_'
+        })
+    else
+        serialized = serpent.dump(data)
+    end
+    file:write(serialized)
+    file:close()
+end
+
+-- Returns a table with matches or nil
+function match_pattern(pattern, text, lower_case)
+    if text then
+        local matches = {}
+        if lower_case then
+            matches = { string.match(text:lower(), pattern) }
+        else
+            matches = { string.match(text, pattern) }
+        end
+        if next(matches) then
+            return matches
+        end
+    end
+    -- nil
+end
+
+function get_receiver(msg)
+    return msg.to.id
+
+end
+
+function getChatId(chat_id)
+    local chat = {}
+    local chat_id = tostring(chat_id)
+
+    if chat_id:match('^-100') then
+        local channel_id = chat_id:gsub('-100', '')
+        chat = {ID = channel_id, type = 'channel'}
+    else
+        local group_id = chat_id:gsub('-', '')
+        chat = {ID = group_id, type = 'group'}
+    end
+
+    return chat
+end
+
+function set_text(lang, keyword, text)
+    local hash = 'lang:'..lang..':'..keyword
+    redis:set(hash, text)
+end
+
+function is_mod(chat_id, user_id)
+    return redis:sismember('mods:'..chat_id, user_id)
+end
+
+function is_admin(user_id)
+    return redis:sismember('admins', user_id)
+end
+
+function is_gban(user_id)
+    return redis:sismember('gbans', user_id)
+end
+
+function new_is_sudo(user_id)
+    local var = false
+    -- Check users id in config
+    for v,user in pairs(_config.sudo_users) do
+        if user == user_id then
+            var = true
+        end
+    end
+    return var
+end
+
+function lang_text(chat_id, keyword)
+    local hash = 'langset:'..chat_id
+    local lang = redis:get(hash)
+    if not lang then
+        redis:set(hash,'en')
+        lang = redis:get(hash)
+    end
+    local hashtext = 'lang:'..lang..':'..keyword
+    if redis:get(hashtext) then
+        return redis:get(hashtext)
+    else
+        return 'Please, install your selected "'..lang..'" language by #install [`archive_name(english_lang, spanish_lang...)`]. First, active your language package like a normal plugin by it\'s name. For example, #plugins enable `english_lang`. Or set another one by typing #lang [language(en, es...)].'
+    end
+
+end
+
+function is_number(name_id)
+    if tonumber(name_id) then
+        return true
+    else
+        return false
+    end
+end
+
+function no_markdown(text, replace)
+    if text then
+        text = tostring(text)
+        if replace then
+            text = text:gsub("`", replace)
+            text = text:gsub("*", replace)
+            text = text:gsub("_", replace)
+            return text
+        end
+        text = text:gsub("`", "")
+        text = text:gsub("*", "")
+        text = text:gsub("_", "")
+        return text
+    end
+    return false
+end
+
+function send_large_msg(chat_id, text)
+    local text_len = string.len(text)
+    local text_max = 4096
+    local times = text_len/text_max
+    local text = text
+    for i = 1, times, 1 do
+        local text = string.sub(text, 1, 4096)
+        local rest = string.sub(text, 4096, text_len)
+        local destination = chat_id
+        local num_msg = math.ceil(text_len / text_max)
+        if num_msg <= 1 then
+            send_msg(destination, text, 'md')
+        else
+        text = rest
+    end
+  end
+end
+
+function scandir(directory)
+    local i, t, popen = 0, {}, io.popen
+    for filename in popen('ls -a "'..directory..'"'):lines() do
+        i = i + 1
+        t[i] = filename
+    end
+    return t
+end
+
+function plugins_names( )
+    local files = {}
+    for k, v in pairs(scandir("plugins")) do
+        -- Ends with .lua
+        if (v:match(".lua$")) then
+            table.insert(files, v)
+        end
+    end
+    return files
+end
+
+function langs_names( )
+    local files = {}
+    for k, v in pairs(scandir("lang")) do
+        -- Ends with .lua
+        if (v:match(".lua$")) then
+            table.insert(files, v)
+        end
+    end
+    return files
+end
+
+function get_multimatch_byspace(str, regex, cut)
+    list = {}
+    for wrd in str:gmatch("%S+") do
+        if (regex and wrd:match(regex)) then
+            table.insert(list, wrd:sub(wrd:find(regex)+cut))
+        elseif (not regex) then
+            table.insert(list, wrd)
+        end
+    end
+    if (#list > 0) then
+        return list
+    end
+    return false
+end
+
+function trim(text)
+    local chars_tmp = {}
+    local chars_m = {}
+    local final_str = ""
+    local text_arr = {}
+    local ok = false
+    local i
+    for i=1, #text do
+        table.insert(chars_tmp, text:sub(i, i))
+    end
+    i=1
+    while(chars_tmp[i]) do
+        if tostring(chars_tmp[i]):match('%S') then
+            table.insert(chars_m, chars_tmp[i])
+            ok = true
+        elseif ok == true then
+            table.insert(chars_m, chars_tmp[i])
+        end
+        i=i+1
+    end
+    i=#chars_m
+    ok=false
+    while(chars_m[i]) do
+        if tostring(chars_m[i]):match('%S') then
+            table.insert(text_arr, chars_m[i])
+            ok = true
+        elseif ok == true then
+            table.insert(text_arr, chars_m[i])
+        end
+        i=i-1
+    end
+    for i=#text_arr, 1, -1 do
+        final_str = final_str..text_arr[i]
+    end
+    return final_str
+end
+
+function underline(text, underline_spaces)
+  local chars = {}
+  local text_str = ""
+  local symbol = trim(" ̲")
+  for i=1, #text do
+      table.insert(chars, text:sub(i, i))
+  end
+  for i=1, #chars do
+      space = chars[i] == ' '
+      if (not space) then
+          text_str = text_str..chars[i]..symbol
+      elseif (underline_spaces) then
+          text_str = text_str..chars[i]..symbol
+      else
+          text_str = text_str..chars[i]
+      end
+  end
+  return text_str
+end
+
+function up_underline(text, underline_spaces)
+  local chars = {}
+  local text_str = ""
+  local symbol = trim(" ̅ ")
+  for i=1, #text do
+      table.insert(chars, text:sub(i, i))
+  end
+  for i=1, #chars do
+      space = chars[i] == ' '
+      if (not space) then
+          text_str = text_str..chars[i]..symbol
+      elseif (underline_spaces) then
+          text_str = text_str..chars[i]..symbol
+      else
+          text_str = text_str..chars[i]
+      end
+  end
+  return text_str
+end
+
+function strike_out(text, underline_spaces)
+  local chars = {}
+  local text_str = ""
+  local symbol = trim(" ̶")
+  for i=1, #text do
+      table.insert(chars, text:sub(i, i))
+  end
+  for i=1, #chars do
+      space = chars[i] == ' '
+      if (not space) then
+          text_str = text_str..chars[i]..symbol
+      elseif (underline_spaces) then
+          text_str = text_str..chars[i]..symbol
+      else
+          text_str = text_str..chars[i]
+      end
+  end
+  return text_str
 end
