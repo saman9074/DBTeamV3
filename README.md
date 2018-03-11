@@ -36,6 +36,18 @@ Debian/Ubuntu and derivatives:
 ```bash
 # Tested on Ubuntu 16.04
 sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install git redis-server lua5.2 liblua5.2-dev lua-lgi libnotify-dev unzip tmux -y && add-apt-repository ppa:ubuntu-toolchain-r/test && sudo apt-get update && apt-get upgrade && sudo apt-get install libconfig++9v5 libstdc++6 && sudo apt autoremove
+
+
+
+#luarocks install
+wget http://luarocks.org/releases/luarocks-2.2.2.tar.gz
+tar zxpf luarocks-2.2.2.tar.gz
+cd luarocks-2.2.2
+./configure; sudo make bootstrap
+sudo luarocks install serpent
+#if error clone
+git config --global url."https://".insteadOf git://
+
 ```                   
 In case of errors like `version GLIBCXX_3.4.21 not defined`, download manually libstdc++6 from [here](https://packages.ubuntu.com/xenial/libstdc++6), install the package with `dpkg -i` and repeat the previous step.
 
