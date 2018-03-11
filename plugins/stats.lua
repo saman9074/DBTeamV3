@@ -44,13 +44,13 @@ local function get_ranking(chatid, first_message)
         for i,x in pairs(tabla) do
                 if i > 20 then break end
                 if i == 1 then
-                        user = user.."\n  "..i.."° 🏆 `"..get_name(chatid, x).." ➝ "..lista[x].."`"
+                        user = user.."\n  "..i.."Â° ðŸ† `"..get_name(chatid, x).." âž "..lista[x].."`"
                 elseif i == 2 then
-                        user = user.."\n  "..i.."° ⭐️ `"..get_name(chatid, x).." ➝ "..lista[x].."`"
+                        user = user.."\n  "..i.."Â° â­ï¸ `"..get_name(chatid, x).." âž "..lista[x].."`"
                 elseif i == 3 then
-                        user = user.."\n  "..i.."° 🔥 `"..get_name(chatid, x).." ➝ "..lista[x].."`"
+                        user = user.."\n  "..i.."Â° ðŸ”¥ `"..get_name(chatid, x).." âž "..lista[x].."`"
                 else
-                        user = user.."\n  "..i.."°  `"..get_name(chatid, x).." ➝ "..lista[x].."`"
+                        user = user.."\n  "..i.."Â°  `"..get_name(chatid, x).." âž "..lista[x].."`"
                 end
         end
         return user
