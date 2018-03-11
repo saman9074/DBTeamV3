@@ -201,7 +201,7 @@ local function pre_process(msg)
 	        	send_msg(msg.to.id, lang_text(chat, 'user')..' @'.. username ..' ('..msg.from.id..') ' .. lang_text(chat, 'isFlooding'), 'md')
 	        end
 	        redis:setex("settings:flood:user:" .. msg.from.id, 60, true)
-	        kick_user(msg.to.id, msg.from.id)
+	        --kick_user(msg.to.id, msg.from.id)
 	        msg.text = ""
 		    return msg
 	    end
@@ -217,7 +217,7 @@ local function run(msg, matches)
 		        redis:set(hash, matches[2])
 		        return lang_text(msg.to.id, 'langUpdated')..string.upper(matches[2])
 		    else
-		        return '🚫 '..lang_text(msg.to.id, 'require_sudo')
+		        return '?? '..lang_text(msg.to.id, 'require_sudo')
 		    end
 		elseif matches[1]:lower() == "settings" and permissions(msg.from.id, msg.to.id, "settings") and redis:get("moderation_group: " .. msg.to.id) then
 			local settings = "*" .. lang_text(msg.to.id, 'groupSettings') .. ":*\n"
