@@ -131,5 +131,5 @@ do
 	        "^[!/#]plugins? (disable) ([%w_%.%-]+)$",
 	        "^[!/#]plugins? (reload)$" },
 	  run = run
-	}
+	} 
 end
