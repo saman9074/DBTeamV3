@@ -18,16 +18,16 @@ require('methods')
 
 
 
-
+--[[
 tdcli = dofile('./tg/tdcli.lua')
 URL = require "socket.url"
 http = require "socket.http"
-https = require "ssl.https"
+--https = require "ssl.https"
 ltn12 = require "ltn12"
 json = (loadfile "./libs/JSON.lua")()
 local JSON = require 'dkjson'
 
-
+]]--
 
 local lgi = require ('lgi')
 local notify = lgi.require('Notify')
